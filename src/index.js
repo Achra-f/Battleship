@@ -1,17 +1,42 @@
-import './style.css';
-import createBoard from './gameboardFactory';
-import createShip from './shipFactory';
+const readline = require('readline');
+const createBoard = require('./gameboardFactory');
+const createShip = require('./shipFactory');
+const createPlayer = require('./playerFactory');
 
+const boardSize = 10;
+const player1 = createPlayer(1);
+const player2 = createPlayer(2);
+const player1Gameboard = createBoard(boardSize);
+const player2Gameboard = createBoard(boardSize);
 
-const gameboard = createBoard(10);
-const ship1 = createShip(1);
+const ship1 = createShip(3);
+const ship2 = createShip(4);
+player1Gameboard.placeShips(ship1, 2, 3, true);
+player2Gameboard.placeShips(ship2, 5, 5, false);
 
-gameboard.placeShips(ship1, 2, 3, true);
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
-gameboard.receiveAttack(2, 6); // Attack ship1
+function playerTurn(player, gameboard) {
+  console.log(`Player ${player.id}'s turn:`);
+  rl.question('Enter the coordinates (e.g., "x y"): ', (input) => {
+    const [x, y] = input.split(' ').map(Number);
 
-gameboard.receiveAttack(2, 4); // Attack ship1
+    if (gameboard.receiveAttack(x, y)) {
+      console.log('Hit!');
+    } else {
+      console.log('Missed!');
+    }
 
-console.log(gameboard.getMissedAttacks())
+    if (gameboard.allShipSunk()) {
+      console.log(`Player ${player.id} wins! Game over.`);
+      rl.close();
+    } else {
+      playerTurn(player === player1 ? player2 : player1, player === player1 ? player2Gameboard : player1Gameboard);
+    }
+  });
+}
 
-console.log(gameboard.allShipSunk()); // Output: true (if all ships are sunk)
+playerTurn(player1, player2Gameboard);

@@ -1,5 +1,3 @@
-const createShip = require('./shipFactory');
-
 function createBoard(length) {
   const board = new Array(length)
     .fill(null)
