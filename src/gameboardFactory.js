@@ -1,3 +1,5 @@
+const createShip = require('./shipFactory');
+
 function createBoard(length) {
   const board = new Array(length)
     .fill(null)
@@ -16,7 +18,7 @@ function createBoard(length) {
         if (board[x + i][y] !== null) {
           throw new Error("There is already a ship at this location.");
         }
-
+        
         board[x + i][y] = ship;
       }
     } else {
@@ -24,23 +26,29 @@ function createBoard(length) {
         if (y + i >= length) {
           throw new Error("Ship placement out of bounds.");
         }
-        if (board[x][y + 1] !== null) {
+        if (board[x][y + i] !== null) {
           throw new Error("There is already a ship at this location.");
         }
-        board[x][y + 1] = ship;
+        
+        board[x][y + i] = ship;
       }
     }
     ships.push(ship);
   }
+  
+  
+  
 
   function receiveAttack(x, y) {
     if (x < 0 || x >= length || y < 0 || y >= length) {
       throw new Error("Attack is out of bounds.");
     }
-
+  
     if (board[x][y] == null) {
+      console.log(`Missed attack at coordinates (${x}, ${y})`);
       missedAttacks.push({ x, y });
     } else {
+      console.log(`Hit ship at coordinates (${x}, ${y})`);
       const ship = board[x][y];
       ship.hit();
     }
@@ -50,10 +58,15 @@ function createBoard(length) {
     return ships.every((ship) => ship.isSunk());
   }
 
+  function getMissedAttacks() {
+    return missedAttacks;
+  }
+
   return {
     placeShips,
     receiveAttack,
     allShipSunk,
+    getMissedAttacks
   };
 }
 
